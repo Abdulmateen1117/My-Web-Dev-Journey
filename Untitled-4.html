@@ -1,0 +1,1385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mateen - Full Stack Developer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        .hero-title, .about-img-wrapper {
+    will-change: transform;
+}
+        /* ========== GLOBAL RESET ========== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Poppins', sans-serif; background: #0a0a0a; color: #fff; overflow-x: hidden; }
+
+        /* ========== PRELOADER ========== */
+        .preloader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 10000; transition: opacity 0.5s, visibility 0.5s;
+        }
+        .preloader.hidden { opacity: 0; visibility: hidden; }
+        .loader {
+            width: 80px; height: 80px; border: 8px solid rgba(255,255,255,0.2);
+            border-top: 8px solid #fff; border-radius: 50%; animation: spin 1s linear infinite;
+        }
+        .loading-text {
+            position: absolute; margin-top: 120px; font-size: 18px; font-weight: 500;
+            letter-spacing: 2px; animation: pulse 1.5s ease-in-out infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+        /* ========== NAVIGATION ========== */
+        nav {
+            position: fixed; top: 0; width: 100%; padding: 20px 0;
+            background: rgba(10, 10, 10, 0.95); backdrop-filter: blur(10px);
+            z-index: 1000; transition: all 0.3s; border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        nav.scrolled { padding: 15px 0; box-shadow: 0 5px 30px rgba(0,0,0,0.3); }
+        nav .container {
+            max-width: 1200px; margin: 0 auto; padding: 0 40px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .logo {
+            font-size: 28px; font-weight: 700; background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .nav-links { display: flex; gap: 40px; list-style: none; }
+        .nav-links a {
+            color: #fff; text-decoration: none; font-weight: 500; position: relative; transition: color 0.3s;
+        }
+        .nav-links a::after {
+            content: ''; position: absolute; bottom: -5px; left: 0; width: 0; height: 2px;
+            background: linear-gradient(135deg, #667eea, #764ba2); transition: width 0.3s;
+        }
+        .nav-links a:hover { color: #667eea; }
+        .nav-links a:hover::after { width: 100%; }
+
+        /* ========== MOBILE MENU ========== */
+        .mobile-menu-btn {
+            display: none; flex-direction: column; gap: 5px; cursor: pointer; z-index: 1001;
+        }
+        .mobile-menu-btn span { width: 30px; height: 3px; background: #fff; border-radius: 3px; transition: all 0.3s; }
+        .mobile-menu-btn.active span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+        .mobile-menu-btn.active span:nth-child(2) { opacity: 0; }
+        .mobile-menu-btn.active span:nth-child(3) { transform: rotate(-45deg) translate(7px, -6px); }
+        .nav-links.mobile-open {
+            display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
+            background: rgba(10, 10, 10, 0.98); flex-direction: column;
+            justify-content: center; align-items: center; gap: 30px; z-index: 999;
+        }
+        .nav-links.mobile-open a { font-size: 24px; }
+
+        /* ========== HERO SECTION ========== */
+        .hero {
+            min-height: 100vh; display: flex; align-items: center; justify-content: center;
+            position: relative; overflow: hidden; background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+        }
+        .hero-background {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(118, 75, 162, 0.1) 0%, transparent 50%);
+            animation: gradientMove 15s ease infinite;
+        }
+        @keyframes gradientMove { 0%, 100% { transform: scale(1) rotate(0deg); } 50% { transform: scale(1.1) rotate(5deg); } }
+        .hero-content { position: relative; z-index: 2; text-align: center; max-width: 900px; padding: 40px; }
+        .hero-greeting { font-size: 20px; color: #667eea; margin-bottom: 20px; opacity: 0; animation: fadeInUp 0.8s ease forwards; }
+        .hero-title {
+            font-size: 72px; font-weight: 800; margin-bottom: 20px;
+            background: linear-gradient(135deg, #fff 0%, #667eea 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            opacity: 0; animation: fadeInUp 0.8s ease 0.2s forwards;
+        }
+        .typing-text { font-size: 32px; color: #aaa; margin-bottom: 30px; min-height: 48px; opacity: 0; animation: fadeInUp 0.8s ease 0.4s forwards; }
+        .typing-cursor { display: inline-block; width: 3px; height: 32px; background: #667eea; margin-left: 5px; animation: blink 0.7s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+        .hero-description { font-size: 18px; line-height: 1.8; color: #bbb; margin-bottom: 40px; opacity: 0; animation: fadeInUp 0.8s ease 0.6s forwards; }
+        .hero-buttons { display: flex; gap: 20px; justify-content: center; opacity: 0; animation: fadeInUp 0.8s ease 0.8s forwards; }
+        .btn {
+            padding: 15px 40px; font-size: 16px; font-weight: 600; border: none;
+            border-radius: 50px; cursor: pointer; transition: all 0.3s; text-decoration: none; display: inline-block;
+        }
+        .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; }
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4); }
+        .btn-secondary { background: transparent; color: #fff; border: 2px solid #667eea; }
+        .btn-secondary:hover { background: #667eea; transform: translateY(-3px); }
+        .scroll-indicator { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); animation: bounce 2s infinite; }
+        .scroll-indicator span { display: block; width: 30px; height: 50px; border: 2px solid #667eea; border-radius: 25px; position: relative; }
+        .scroll-indicator span::before {
+            content: ''; position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+            width: 6px; height: 6px; background: #667eea; border-radius: 50%; animation: scroll 2s infinite;
+        }
+        @keyframes scroll { 0% { transform: translate(-50%, 0); opacity: 0; } 40% { opacity: 1; } 80% { transform: translate(-50%, 20px); opacity: 0; } 100% { opacity: 0; } }
+        @keyframes bounce { 0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); } 40% { transform: translateX(-50%) translateY(-10px); } 60% { transform: translateX(-50%) translateY(-5px); } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ========== SECTION COMMON ========== */
+        section { padding: 100px 40px; position: relative; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .section-title {
+            text-align: center; font-size: 48px; font-weight: 700; margin-bottom: 20px;
+            background: linear-gradient(135deg, #fff, #667eea); -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .section-subtitle { text-align: center; font-size: 18px; color: #888; margin-bottom: 60px; }
+
+        /* ========== ABOUT SECTION ========== */
+        .about { background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 100%); }
+        .about-content { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+        .about-image { position: relative; }
+        .about-img-wrapper {
+            width: 400px; height: 400px; background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; display: flex; align-items: center;
+            justify-content: center; font-size: 120px; animation: morph 8s ease-in-out infinite;
+            box-shadow: 0 20px 60px rgba(102, 126, 234, 0.3);
+        }
+        @keyframes morph {
+            0%, 100% { border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; }
+            25% { border-radius: 58% 42% 75% 25% / 76% 46% 54% 24%; }
+            50% { border-radius: 50% 50% 33% 67% / 55% 27% 73% 45%; }
+            75% { border-radius: 33% 67% 58% 42% / 63% 68% 32% 37%; }
+        }
+        .about-text h3 { font-size: 28px; color: #667eea; margin-bottom: 20px; }
+        .about-text p { font-size: 16px; line-height: 1.8; color: #bbb; margin-bottom: 20px; }
+        .about-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-top: 40px; }
+        .stat-box {
+            text-align: center; padding: 20px; background: rgba(102, 126, 234, 0.1);
+            border-radius: 15px; border: 1px solid rgba(102, 126, 234, 0.2); transition: all 0.3s;
+        }
+        .stat-box:hover { transform: translateY(-5px); background: rgba(102, 126, 234, 0.2); }
+        .stat-number { font-size: 36px; font-weight: 700; color: #667eea; margin-bottom: 5px; }
+        .stat-label { font-size: 14px; color: #888; }
+
+        /* ========== TIMELINE ========== */
+        .timeline { background: #0a0a0a; }
+        .timeline-container { position: relative; max-width: 1000px; margin: 0 auto; }
+        .timeline-line { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: linear-gradient(180deg, #667eea, #764ba2); }
+        .timeline-item { display: flex; justify-content: flex-end; padding-right: 50%; position: relative; margin-bottom: 50px; }
+        .timeline-item:nth-child(even) { justify-content: flex-start; padding-left: 50%; padding-right: 0; }
+        .timeline-content {
+            background: rgba(102, 126, 234, 0.1); padding: 30px; border-radius: 15px;
+            width: 400px; margin-right: 50px; border: 1px solid rgba(102, 126, 234, 0.2); transition: all 0.3s;
+        }
+        .timeline-item:nth-child(even) .timeline-content { margin-left: 50px; margin-right: 0; }
+        .timeline-content:hover { transform: scale(1.05); background: rgba(102, 126, 234, 0.2); }
+        .timeline-dot { position: absolute; left: 50%; transform: translateX(-50%); width: 20px; height: 20px; background: #667eea; border-radius: 50%; border: 4px solid #0a0a0a; }
+        .timeline-date { font-size: 14px; color: #667eea; margin-bottom: 10px; font-weight: 600; }
+        .timeline-title { font-size: 20px; font-weight: 600; margin-bottom: 10px; }
+        .timeline-description { font-size: 14px; color: #888; line-height: 1.6; }
+
+        /* ========== SKILLS SECTION ========== */
+        .skills { background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 100%); }
+        .skills-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 40px; }
+        .skill-item {
+            background: rgba(255, 255, 255, 0.02); padding: 30px; border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1); transition: all 0.3s;
+        }
+        .skill-item:hover { transform: translateY(-5px); background: rgba(102, 126, 234, 0.1); border-color: rgba(102, 126, 234, 0.3); }
+        .skill-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .skill-name { font-size: 18px; font-weight: 600; }
+        .skill-percentage { font-size: 18px; color: #667eea; font-weight: 700; }
+        .skill-bar { width: 100%; height: 10px; background: rgba(255, 255, 255, 0.1); border-radius: 10px; overflow: hidden; position: relative; }
+        .skill-progress {
+            height: 100%; background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 10px; position: relative; transition: width 2s ease; width: 0;
+        }
+        .skill-progress::after {
+            content: ''; position: absolute; top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+
+        /* ========== ARCHITECTURE / VISUALIZATION SECTION ========== */
+        .architecture {
+            background: linear-gradient(135deg, #02020a 0%, #0a0a1a 50%, #0c0c24 100%);
+            position: relative; overflow: hidden;
+        }
+        .arch-container {
+            position: relative; width: 100%; max-width: 1000px; margin: 0 auto;
+            height: 520px;
+        }
+        .viz-header {
+            text-align: center; font-size: 13px; letter-spacing: 5px;
+            color: #667eea; text-transform: uppercase; font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        /* Floating Charts */
+        .floating-chart {
+            position: absolute; font-size: 32px; opacity: 0.12;
+            animation: float 6s ease-in-out infinite; z-index: 1;
+        }
+        .chart-1 { top: 2%; left: 4%; animation-delay: 0s; }
+        .chart-2 { top: 8%; right: 6%; animation-delay: 1.5s; }
+        .chart-3 { bottom: 28%; left: 2%; animation-delay: 3s; }
+        .chart-4 { bottom: 32%; right: 3%; animation-delay: 4.5s; }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+        }
+
+        /* Side Labels */
+        .side-label {
+            position: absolute; font-size: 11px; letter-spacing: 4px;
+            color: #667eea; text-transform: uppercase; font-weight: 700; z-index: 2;
+        }
+        .label-left { left: 0; top: 50%; transform: translateY(-50%) rotate(-90deg); transform-origin: center; }
+        .label-right { right: 0; top: 50%; transform: translateY(-50%) rotate(90deg); transform-origin: center; }
+
+        /* SVG Connections */
+        .arch-connections {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 2; pointer-events: none;
+        }
+
+        /* Core Node */
+        .core-node {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 140px; height: 140px;
+            background: radial-gradient(circle, rgba(0,255,255,0.2) 0%, transparent 70%);
+            border: 2px solid #00ffff; border-radius: 50%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            box-shadow: 0 0 60px rgba(0,255,255,0.25), inset 0 0 30px rgba(0,255,255,0.08);
+            z-index: 10; animation: pulse-glow 3s ease-in-out infinite;
+        }
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 60px rgba(0,255,255,0.25), inset 0 0 30px rgba(0,255,255,0.08); }
+            50% { box-shadow: 0 0 90px rgba(0,255,255,0.45), inset 0 0 45px rgba(0,255,255,0.15); }
+        }
+        .core-icon { font-size: 40px; margin-bottom: 5px; filter: drop-shadow(0 0 10px rgba(0,255,255,0.5)); }
+        .core-label { font-size: 11px; font-weight: 800; color: #00ffff; letter-spacing: 2px; }
+
+        /* Satellite Nodes */
+        .arch-node {
+            position: absolute; text-align: center; z-index: 10; transition: transform 0.3s;
+            width: 140px;
+        }
+        .arch-node:hover { transform: scale(1.15); }
+        .arch-circle {
+            width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 10px;
+            display: flex; align-items: center; justify-content: center; font-size: 30px;
+            position: relative; transition: all 0.3s;
+        }
+        .arch-title { font-size: 12px; font-weight: 700; color: #fff; line-height: 1.4; text-shadow: 0 0 10px rgba(0,0,0,0.8); }
+
+        /* Node Positions */
+        .node-ai { top: 5%; left: 12%; }
+        .node-rag { top: 5%; right: 12%; }
+        .node-mongo { top: 40%; left: 3%; }
+        .node-pinecone { bottom: 12%; left: 10%; }
+        .node-gemini { top: 40%; right: 3%; }
+        .node-openai { bottom: 12%; right: 10%; }
+
+        /* Node Neon Colors */
+        .node-ai .arch-circle {
+            background: rgba(138,43,226,0.12); border: 2px solid #8a2be2;
+            box-shadow: 0 0 30px rgba(138,43,226,0.35), inset 0 0 15px rgba(138,43,226,0.1);
+        }
+        .node-rag .arch-circle {
+            background: rgba(255,0,255,0.12); border: 2px solid #ff00ff;
+            box-shadow: 0 0 30px rgba(255,0,255,0.35), inset 0 0 15px rgba(255,0,255,0.1);
+        }
+        .node-mongo .arch-circle {
+            background: rgba(50,205,50,0.12); border: 2px solid #32cd32;
+            box-shadow: 0 0 30px rgba(50,205,50,0.35), inset 0 0 15px rgba(50,205,50,0.1);
+        }
+        .node-pinecone .arch-circle {
+            background: rgba(255,165,0,0.12); border: 2px solid #ffa500;
+            box-shadow: 0 0 30px rgba(255,165,0,0.35), inset 0 0 15px rgba(255,165,0,0.1);
+        }
+        .node-gemini .arch-circle {
+            background: rgba(30,144,255,0.12); border: 2px solid #1e90ff;
+            box-shadow: 0 0 30px rgba(30,144,255,0.35), inset 0 0 15px rgba(30,144,255,0.1);
+        }
+        .node-openai .arch-circle {
+            background: rgba(0,255,127,0.12); border: 2px solid #00ff7f;
+            box-shadow: 0 0 30px rgba(0,255,127,0.35), inset 0 0 15px rgba(0,255,127,0.1);
+        }
+
+        /* Bottom Cards */
+        .arch-cards {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px;
+            margin-top: 60px; position: relative; z-index: 10;
+        }
+        .arch-card {
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px; padding: 25px 20px; text-align: center;
+            transition: all 0.3s; backdrop-filter: blur(10px);
+        }
+        .arch-card:hover {
+            transform: translateY(-8px); border-color: rgba(102, 126, 234, 0.5);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.25);
+            background: rgba(102, 126, 234, 0.08);
+        }
+        .arch-card-icon { font-size: 36px; margin-bottom: 12px; }
+        .arch-card-title { font-size: 14px; font-weight: 600; color: #ddd; }
+
+        /* ========== PROJECTS SECTION ========== */
+        .projects { background: #0a0a0a; }
+        .projects-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
+        .project-card {
+            background: rgba(255, 255, 255, 0.02); border-radius: 20px; overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1); transition: all 0.3s; cursor: pointer;
+        }
+        .project-card:hover { transform: translateY(-10px); border-color: rgba(102, 126, 234, 0.5); box-shadow: 0 20px 40px rgba(102, 126, 234, 0.2); }
+        .project-image {
+            height: 220px; background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex; align-items: center; justify-content: center; font-size: 80px;
+            position: relative; overflow: hidden;
+        }
+        .project-image::before {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: rotate(45deg); animation: shine 3s infinite;
+        }
+        @keyframes shine { 0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); } 100% { transform: translateX(100%) translateY(100%) rotate(45deg); } }
+        .project-info { padding: 25px; }
+        .project-title { font-size: 22px; font-weight: 600; margin-bottom: 10px; color: #fff; }
+        .project-description { font-size: 14px; color: #888; line-height: 1.6; margin-bottom: 15px; }
+        .project-tags { display: flex; flex-wrap: wrap; gap: 10px; }
+        .project-tag { padding: 5px 15px; background: rgba(102, 126, 234, 0.2); border-radius: 20px; font-size: 12px; color: #667eea; }
+
+        /* ========== CONTACT SECTION ========== */
+        .contact { background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 100%); }
+        .contact-content { max-width: 800px; margin: 0 auto; text-align: center; }
+        .contact-info { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-top: 50px; }
+        .contact-box {
+            padding: 30px; background: rgba(102, 126, 234, 0.1); border-radius: 20px;
+            border: 1px solid rgba(102, 126, 234, 0.2); transition: all 0.3s;
+            text-decoration: none; color: inherit; display: block;
+        }
+        .contact-box:hover { transform: translateY(-10px); background: rgba(102, 126, 234, 0.2); box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3); }
+        .contact-icon { font-size: 40px; margin-bottom: 15px; }
+        .contact-label { font-size: 14px; color: #888; margin-bottom: 5px; }
+        .contact-value { font-size: 16px; font-weight: 600; color: #fff; }
+
+        /* ========== FOOTER ========== */
+        footer { background: #0a0a0a; padding: 40px 20px; text-align: center; border-top: 1px solid rgba(255, 255, 255, 0.1); }
+        footer p { color: #888; margin: 5px 0; }
+        .footer-highlight { color: #667eea; font-weight: 600; }
+
+        /* ========== AUTH / LOGIN OVERLAY ========== */
+        .auth-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); z-index: 10002; align-items: center; justify-content: center;
+        }
+        .auth-overlay.active { display: flex; }
+        .auth-box {
+            background: #1a1a2e; border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 20px; padding: 40px; width: 90%; max-width: 400px;
+            text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+        .auth-box h2 {
+            font-size: 24px; margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .auth-box p { color: #888; font-size: 14px; margin-bottom: 25px; }
+        .auth-input {
+            width: 100%; padding: 14px 18px; background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;
+            color: #fff; font-family: 'Poppins', sans-serif; font-size: 16px;
+            margin-bottom: 15px; outline: none;
+        }
+        .auth-input:focus { border-color: #667eea; background: rgba(102, 126, 234, 0.1); }
+        .auth-btn {
+            width: 100%; padding: 14px; background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff; border: none; border-radius: 12px; cursor: pointer;
+            font-weight: 600; font-size: 16px; transition: all 0.3s;
+        }
+        .auth-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4); }
+        .auth-error { color: #ff4757; font-size: 13px; margin-top: 10px; display: none; }
+        .auth-error.show { display: block; }
+        .auth-hint {
+            margin-top: 20px; font-size: 12px; color: #555;
+            border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;
+        }
+
+        /* ========== ADMIN PANEL ========== */
+        .admin-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 10001; overflow-y: auto;
+        }
+        .admin-overlay.active { display: block; }
+        .admin-panel {
+            max-width: 900px; margin: 50px auto; background: #1a1a2e;
+            border-radius: 20px; border: 1px solid rgba(102, 126, 234, 0.3);
+            padding: 40px; position: relative;
+        }
+        .admin-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .admin-header h2 {
+            font-size: 28px; background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .admin-close {
+            background: #ff4757; color: #fff; border: none; padding: 10px 20px;
+            border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 600;
+        }
+        .admin-close:hover { background: #ff6b81; }
+        .admin-section { margin-bottom: 30px; }
+        .admin-section h3 {
+            font-size: 20px; color: #667eea; margin-bottom: 15px;
+            border-left: 4px solid #667eea; padding-left: 10px;
+        }
+        .admin-form-group { margin-bottom: 15px; }
+        .admin-form-group label {
+            display: block; font-size: 14px; color: #aaa; margin-bottom: 5px; font-weight: 500;
+        }
+        .admin-form-group input,
+        .admin-form-group textarea {
+            width: 100%; padding: 12px 15px; background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 10px;
+            color: #fff; font-family: 'Poppins', sans-serif; font-size: 14px;
+        }
+        .admin-form-group input:focus,
+        .admin-form-group textarea:focus {
+            outline: none; border-color: #667eea; background: rgba(102, 126, 234, 0.1);
+        }
+        .admin-form-group textarea { min-height: 80px; resize: vertical; }
+        .admin-btn {
+            padding: 10px 25px; background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff; border: none; border-radius: 10px; cursor: pointer;
+            font-weight: 600; font-size: 14px; margin-right: 10px; margin-top: 10px;
+        }
+        .admin-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4); }
+        .admin-btn.secondary { background: rgba(255,255,255,0.1); }
+        .admin-btn.danger { background: #ff4757; }
+        .admin-item {
+            background: rgba(255,255,255,0.03); padding: 15px; border-radius: 10px;
+            margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.05);
+        }
+        .admin-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .admin-item-title { font-weight: 600; color: #fff; }
+        .admin-item-delete {
+            background: #ff4757; color: #fff; border: none; padding: 5px 12px;
+            border-radius: 5px; cursor: pointer; font-size: 12px;
+        }
+        .admin-hint {
+            position: fixed; bottom: 20px; right: 20px; background: rgba(102, 126, 234, 0.2);
+            padding: 10px 15px; border-radius: 10px; font-size: 12px; color: #888;
+            border: 1px solid rgba(102, 126, 234, 0.3); z-index: 1000;
+        }
+        .admin-logout-btn {
+            background: #2ed573; color: #fff; border: none; padding: 10px 20px;
+            border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 600;
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 968px) {
+            .hero-title { font-size: 48px; }
+            .typing-text { font-size: 24px; }
+            .about-content { grid-template-columns: 1fr; }
+            .about-img-wrapper { width: 300px; height: 300px; }
+            .skills-grid { grid-template-columns: 1fr; }
+            .projects-grid { grid-template-columns: 1fr; }
+            .contact-info { grid-template-columns: 1fr; }
+            .nav-links { display: none; }
+            .mobile-menu-btn { display: flex; }
+            .timeline-item, .timeline-item:nth-child(even) { padding-left: 50px; padding-right: 0; justify-content: flex-start; }
+            .timeline-content { margin-left: 0; margin-right: 0; width: 100%; }
+            .timeline-line { left: 25px; }
+            .timeline-dot { left: 25px; }
+            .admin-panel { margin: 20px; padding: 20px; }
+            
+            /* Architecture Mobile */
+            .arch-container { height: 380px; }
+            .core-node { width: 100px; height: 100px; }
+            .core-icon { font-size: 28px; }
+            .core-label { font-size: 9px; letter-spacing: 1px; }
+            .arch-circle { width: 55px; height: 55px; font-size: 22px; }
+            .arch-title { font-size: 10px; }
+            .arch-node { width: 100px; }
+            .node-ai { top: 2%; left: 5%; }
+            .node-rag { top: 2%; right: 5%; }
+            .node-mongo { top: 35%; left: 0%; }
+            .node-pinecone { bottom: 10%; left: 5%; }
+            .node-gemini { top: 35%; right: 0%; }
+            .node-openai { bottom: 10%; right: 5%; }
+            .arch-cards { grid-template-columns: 1fr; gap: 15px; margin-top: 30px; }
+            .side-label { display: none; }
+            .floating-chart { font-size: 24px; }
+        }
+
+        /* ========== UTILITY ========== */
+        .fade-in { opacity: 0; transform: translateY(30px); transition: all 0.8s ease; }
+        .fade-in.visible { opacity: 1; transform: translateY(0); }
+    </style>
+</head>
+<body>
+    <!-- PRELOADER -->
+    <div class="preloader" id="preloader">
+        <div>
+            <div class="loader"></div>
+            <div class="loading-text">LOADING...</div>
+        </div>
+    </div>
+
+    <!-- NAVIGATION -->
+    <nav id="navbar">
+        <div class="container">
+            <div class="logo">&lt;Mateen/&gt;</div>
+            <div class="mobile-menu-btn" id="mobile-menu-btn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#journey">Journey</a></li>
+                <li><a href="#skills">Skills</a></li>
+                <li><a href="#architecture">Architecture</a></li>
+                <li><a href="#projects">Projects</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <section class="hero" id="home">
+        <div class="hero-background"></div>
+        <div class="hero-content">
+            <div class="hero-greeting" id="hero-greeting">Hello, my name is</div>
+            <h1 class="hero-title" id="hero-name">Mateen</h1>
+            <div class="typing-text" id="typing-text"></div>
+            <p class="hero-description" id="hero-desc">
+                Passionate IT student on a journey to become a full-stack web developer.
+                Specializing in Health-Tech solutions and building digital experiences
+                that make a difference.
+            </p>
+            <div class="hero-buttons">
+                <a href="#contact" class="btn btn-primary">Get In Touch</a>
+                <a href="#projects" class="btn btn-secondary">View Projects</a>
+            </div>
+        </div>
+        <div class="scroll-indicator">
+            <span></span>
+        </div>
+    </section>
+
+    <!-- ABOUT SECTION -->
+    <section class="about fade-in" id="about">
+        <div class="container">
+            <h2 class="section-title">About Me</h2>
+            <p class="section-subtitle">Get to know me better</p>
+            <div class="about-content">
+                <div class="about-image">
+                    <div class="about-img-wrapper">👨‍💻</div>
+                </div>
+                <div class="about-text">
+                    <h3 id="about-title">Aspiring Full-Stack Developer</h3>
+                    <div id="about-text-content">
+                        <p><strong>Assalam-o-Alaikum!</strong> I'm Mateen, a dedicated IT student who started my web development journey in May 2026. My mission is to become a professional full-stack developer by December 2026.</p>
+                        <p>Currently mastering modern web technologies including HTML, CSS, JavaScript, React, Node.js, and PostgreSQL. My focus is on creating scalable, efficient, and user-friendly applications in the Health-Tech sector.</p>
+                        <p>Beyond coding, I'm committed to breaking cycles and building a future where technology solves real-world problems. My goal is to work with international tech companies and contribute to innovative projects.</p>
+                    </div>
+                    <div class="about-stats" id="about-stats">
+                        <div class="stat-box"><div class="stat-number">7</div><div class="stat-label">Months Training</div></div>
+                        <div class="stat-box"><div class="stat-number">15+</div><div class="stat-label">Projects Goal</div></div>
+                        <div class="stat-box"><div class="stat-number">100%</div><div class="stat-label">Commitment</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TIMELINE SECTION -->
+    <section class="timeline fade-in" id="journey">
+        <div class="container">
+            <h2 class="section-title">My Journey</h2>
+            <p class="section-subtitle">The path to becoming a full-stack developer</p>
+            <div class="timeline-container" id="timeline-container">
+                <div class="timeline-line"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SKILLS SECTION -->
+    <section class="skills fade-in" id="skills">
+        <div class="container">
+            <h2 class="section-title">Technical Skills</h2>
+            <p class="section-subtitle">Technologies I'm mastering</p>
+            <div class="skills-grid" id="skills-grid"></div>
+        </div>
+    </section>
+
+    <!-- ARCHITECTURE / VISUALIZATION SECTION -->
+    <section class="architecture fade-in" id="architecture">
+        <div class="container">
+            <div class="viz-header">Visualizing Data & Concepts</div>
+            <h2 class="section-title" style="font-size:36px; margin-bottom:10px;">My Technical Ecosystem</h2>
+            <p class="section-subtitle">How I architect modern full-stack solutions</p>
+            
+            <div class="arch-container">
+                <!-- Floating Charts -->
+                <div class="floating-chart chart-1">📊</div>
+                <div class="floating-chart chart-2">📈</div>
+                <div class="floating-chart chart-3">📉</div>
+                <div class="floating-chart chart-4">💹</div>
+                
+                <!-- Side Labels -->
+                <div class="side-label label-left">Data Sources</div>
+                <div class="side-label label-right">AI Models</div>
+                
+                <!-- SVG Connections -->
+                <svg class="arch-connections" viewBox="0 0 1000 520" preserveAspectRatio="xMidYMid meet">
+                    <defs>
+                        <linearGradient id="grad-ai" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#8a2be2;stop-opacity:0.9" />
+                            <stop offset="100%" style="stop-color:#00ffff;stop-opacity:0.9" />
+                        </linearGradient>
+                        <linearGradient id="grad-rag" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#ff00ff;stop-opacity:0.9" />
+                            <stop offset="100%" style="stop-color:#00ffff;stop-opacity:0.9" />
+                        </linearGradient>
+                        <linearGradient id="grad-mongo" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#32cd32;stop-opacity:0.9" />
+                            <stop offset="100%" style="stop-color:#00ffff;stop-opacity:0.9" />
+                        </linearGradient>
+                        <linearGradient id="grad-pine" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#ffa500;stop-opacity:0.9" />
+                            <stop offset="100%" style="stop-color:#00ffff;stop-opacity:0.9" />
+                        </linearGradient>
+                        <linearGradient id="grad-gem" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#1e90ff;stop-opacity:0.9" />
+                            <stop offset="100%" style="stop-color:#00ffff;stop-opacity:0.9" />
+                        </linearGradient>
+                        <linearGradient id="grad-open" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#00ff7f;stop-opacity:0.9" />
+                            <stop offset="100%" style="stop-color:#00ffff;stop-opacity:0.9" />
+                        </linearGradient>
+                        <filter id="glow-line" x="-50%" y="-50%" width="200%" height="200%">
+                            <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                            <feMerge>
+                                <feMergeNode in="coloredBlur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                    </defs>
+                    
+                    <!-- Curved paths from center (500, 260) to each node -->
+                    <path d="M 500 260 Q 350 180 180 100" stroke="url(#grad-ai)" stroke-width="3" fill="none" filter="url(#glow-line)" opacity="0.7"/>
+                    <path d="M 500 260 Q 650 180 820 100" stroke="url(#grad-rag)" stroke-width="3" fill="none" filter="url(#glow-line)" opacity="0.7"/>
+                    <path d="M 500 260 Q 320 260 150 260" stroke="url(#grad-mongo)" stroke-width="3" fill="none" filter="url(#glow-line)" opacity="0.7"/>
+                    <path d="M 500 260 Q 340 360 220 430" stroke="url(#grad-pine)" stroke-width="3" fill="none" filter="url(#glow-line)" opacity="0.7"/>
+                    <path d="M 500 260 Q 680 260 850 260" stroke="url(#grad-gem)" stroke-width="3" fill="none" filter="url(#glow-line)" opacity="0.7"/>
+                    <path d="M 500 260 Q 660 360 780 430" stroke="url(#grad-open)" stroke-width="3" fill="none" filter="url(#glow-line)" opacity="0.7"/>
+                </svg>
+                
+                <!-- Core Node -->
+                <div class="core-node">
+                    <div class="core-icon">⚛️</div>
+                    <div class="core-label">CORE LOGIC</div>
+                </div>
+                
+                <!-- Satellite Nodes -->
+                <div class="arch-node node-ai">
+                    <div class="arch-circle">🧠</div>
+                    <div class="arch-title">AI Full Stack</div>
+                </div>
+                
+                <div class="arch-node node-rag">
+                    <div class="arch-circle">🏗️</div>
+                    <div class="arch-title">RAG Architecture</div>
+                </div>
+                
+                <div class="arch-node node-mongo">
+                    <div class="arch-circle">🍃</div>
+                    <div class="arch-title">MongoDB</div>
+                </div>
+                
+                <div class="arch-node node-pinecone">
+                    <div class="arch-circle">🌲</div>
+                    <div class="arch-title">Pinecone<br>Vector DB</div>
+                </div>
+                
+                <div class="arch-node node-gemini">
+                    <div class="arch-circle">✨</div>
+                    <div class="arch-title">Gemini API</div>
+                </div>
+                
+                <div class="arch-node node-openai">
+                    <div class="arch-circle">🌀</div>
+                    <div class="arch-title">OpenAI API</div>
+                </div>
+            </div>
+            
+            <!-- Bottom Cards -->
+            <div class="arch-cards">
+                <div class="arch-card">
+                    <div class="arch-card-icon">🐍</div>
+                    <div class="arch-card-title">Python Backend</div>
+                </div>
+                <div class="arch-card">
+                    <div class="arch-card-icon">❤️</div>
+                    <div class="arch-card-title">Responsive CSS Flexbox</div>
+                </div>
+                <div class="arch-card">
+                    <div class="arch-card-icon">🔄</div>
+                    <div class="arch-card-title">GitHub Workflow</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PROJECTS SECTION -->
+    <section class="projects fade-in" id="projects">
+        <div class="container">
+            <h2 class="section-title">Featured Projects</h2>
+            <p class="section-subtitle">Showcase of my work</p>
+            <div class="projects-grid" id="projects-grid"></div>
+        </div>
+    </section>
+
+    <!-- CONTACT SECTION -->
+    <section class="contact fade-in" id="contact">
+        <div class="container">
+            <div class="contact-content">
+                <h2 class="section-title">Let's Connect</h2>
+                <p class="section-subtitle">Open to freelance opportunities and collaborations</p>
+                <div class="contact-info" id="contact-info"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer id="footer-content">
+        <p>&copy; 2026 <span class="footer-highlight">Mateen</span>. All rights reserved.</p>
+        <p>🚀 Journey Started: <span class="footer-highlight">May 20, 2026</span></p>
+        <p>🎯 Goal: <span class="footer-highlight">Full-Stack Developer by December 2026</span></p>
+        <p>💪 Motto: <span class="footer-highlight">"Break the cycle, build the future"</span></p>
+    </footer>
+
+    <!-- ADMIN HINT -->
+    <div class="admin-hint" id="admin-hint">Press Ctrl+Shift+A for Admin</div>
+
+    <!-- AUTH / LOGIN OVERLAY -->
+    <div class="auth-overlay" id="auth-overlay">
+        <div class="auth-box">
+            <h2>🔐 Admin Login</h2>
+            <p>Enter your admin password to continue</p>
+            <input type="password" class="auth-input" id="auth-password" placeholder="Password" onkeydown="if(event.key==='Enter')loginAdmin()">
+            <button class="auth-btn" onclick="loginAdmin()">Login</button>
+            <div class="auth-error" id="auth-error">Wrong password! Try again.</div>
+            <div class="auth-hint">
+                Default: <strong>mateen2026</strong> &nbsp;|&nbsp; 
+                <a href="#" onclick="forgotPassword()" style="color:#667eea;text-decoration:none;">Forgot Password?</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADMIN PANEL -->
+    <div class="admin-overlay" id="admin-overlay">
+        <div class="admin-panel">
+            <div class="admin-header">
+                <h2>⚙️ Admin Panel</h2>
+                <div>
+                    <button class="admin-logout-btn" onclick="logoutAdmin()" style="margin-right:10px;">Logout</button>
+                    <button class="admin-close" onclick="closeAdmin()">Close</button>
+                </div>
+            </div>
+
+            <!-- Hero Edit -->
+            <div class="admin-section">
+                <h3>Hero Section</h3>
+                <div class="admin-form-group">
+                    <label>Greeting</label>
+                    <input type="text" id="admin-hero-greeting" value="Hello, my name is">
+                </div>
+                <div class="admin-form-group">
+                    <label>Name</label>
+                    <input type="text" id="admin-hero-name" value="Mateen">
+                </div>
+                <div class="admin-form-group">
+                    <label>Description</label>
+                    <textarea id="admin-hero-desc">Passionate IT student on a journey to become a full-stack web developer. Specializing in Health-Tech solutions and building digital experiences that make a difference.</textarea>
+                </div>
+            </div>
+
+            <!-- About Edit -->
+            <div class="admin-section">
+                <h3>About Section</h3>
+                <div class="admin-form-group">
+                    <label>Title</label>
+                    <input type="text" id="admin-about-title" value="Aspiring Full-Stack Developer">
+                </div>
+                <div class="admin-form-group">
+                    <label>Paragraph 1</label>
+                    <textarea id="admin-about-p1"><strong>Assalam-o-Alaikum!</strong> I'm Mateen, a dedicated IT student who started my web development journey in May 2026. My mission is to become a professional full-stack developer by December 2026.</textarea>
+                </div>
+                <div class="admin-form-group">
+                    <label>Paragraph 2</label>
+                    <textarea id="admin-about-p2">Currently mastering modern web technologies including HTML, CSS, JavaScript, React, Node.js, and PostgreSQL. My focus is on creating scalable, efficient, and user-friendly applications in the Health-Tech sector.</textarea>
+                </div>
+                <div class="admin-form-group">
+                    <label>Paragraph 3</label>
+                    <textarea id="admin-about-p3">Beyond coding, I'm committed to breaking cycles and building a future where technology solves real-world problems. My goal is to work with international tech companies and contribute to innovative projects.</textarea>
+                </div>
+            </div>
+
+            <!-- Stats Edit -->
+            <div class="admin-section">
+                <h3>Stats</h3>
+                <div id="admin-stats-container"></div>
+                <button class="admin-btn" onclick="addStat()">+ Add Stat</button>
+            </div>
+
+            <!-- Skills Edit -->
+            <div class="admin-section">
+                <h3>Skills</h3>
+                <div id="admin-skills-container"></div>
+                <button class="admin-btn" onclick="addSkill()">+ Add Skill</button>
+            </div>
+
+            <!-- Timeline Edit -->
+            <div class="admin-section">
+                <h3>Timeline</h3>
+                <div id="admin-timeline-container"></div>
+                <button class="admin-btn" onclick="addTimeline()">+ Add Timeline Item</button>
+            </div>
+
+            <!-- Projects Edit -->
+            <div class="admin-section">
+                <h3>Projects</h3>
+                <div id="admin-projects-container"></div>
+                <button class="admin-btn" onclick="addProject()">+ Add Project</button>
+            </div>
+
+            <!-- Contact Edit -->
+            <div class="admin-section">
+                <h3>Contact Info</h3>
+                <div id="admin-contact-container"></div>
+                <button class="admin-btn" onclick="addContact()">+ Add Contact</button>
+            </div>
+
+            <!-- Footer Edit -->
+            <div class="admin-section">
+                <h3>Footer</h3>
+                <div class="admin-form-group">
+                    <label>Footer Line 1</label>
+                    <input type="text" id="admin-footer-1" value="© 2026 Mateen. All rights reserved.">
+                </div>
+                <div class="admin-form-group">
+                    <label>Footer Line 2</label>
+                    <input type="text" id="admin-footer-2" value="🚀 Journey Started: May 20, 2026">
+                </div>
+                <div class="admin-form-group">
+                    <label>Footer Line 3</label>
+                    <input type="text" id="admin-footer-3" value="🎯 Goal: Full-Stack Developer by December 2026">
+                </div>
+                <div class="admin-form-group">
+                    <label>Footer Line 4</label>
+                    <input type="text" id="admin-footer-4" value='💪 Motto: "Break the cycle, build the future"'>
+                </div>
+            </div>
+
+            <!-- Security -->
+            <div class="admin-section" style="border-top:2px solid rgba(255,255,255,0.1);padding-top:20px;">
+                <h3>🔐 Security Settings</h3>
+                <div class="admin-form-group">
+                    <label>Current Password</label>
+                    <input type="password" id="admin-current-pass" placeholder="Enter current password">
+                </div>
+                <div class="admin-form-group">
+                    <label>New Password</label>
+                    <input type="password" id="admin-new-pass" placeholder="Enter new password">
+                </div>
+                <div class="admin-form-group">
+                    <label>Confirm New Password</label>
+                    <input type="password" id="admin-confirm-pass" placeholder="Confirm new password">
+                </div>
+                <button class="admin-btn" onclick="changePassword()">Change Password</button>
+            </div>
+
+            <!-- Actions -->
+            <div class="admin-section" style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+                <button class="admin-btn" onclick="saveAll()">💾 Save All Changes</button>
+                <button class="admin-btn secondary" onclick="exportData()">📤 Export JSON</button>
+                <button class="admin-btn secondary" onclick="importData()">📥 Import JSON</button>
+                <button class="admin-btn danger" onclick="resetData()">🔄 Reset to Default</button>
+            </div>
+            
+            <div class="admin-form-group" style="margin-top: 15px;">
+                <label>Import JSON Data</label>
+                <textarea id="admin-import-area" placeholder="Paste exported JSON here..."></textarea>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Intersection Observer: Jab user scroll karega, animation khud trigger hogi
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+        }
+    });
+});
+
+const fadeElements = document.querySelectorAll('.fade-in');
+fadeElements.forEach(el => observer.observe(el));
+        // ========== DEFAULT DATA ==========
+        const defaultData = {
+            hero: {
+                greeting: "Hello, my name is",
+                name: "Mateen",
+                desc: "Passionate IT student on a journey to become a full-stack web developer. Specializing in Health-Tech solutions and building digital experiences that make a difference."
+            },
+            about: {
+                title: "Aspiring Full-Stack Developer",
+                paragraphs: [
+                    "<strong>Assalam-o-Alaikum!</strong> I'm Mateen, a dedicated IT student who started my web development journey in May 2026. My mission is to become a professional full-stack developer by December 2026.",
+                    "Currently mastering modern web technologies including HTML, CSS, JavaScript, React, Node.js, and PostgreSQL. My focus is on creating scalable, efficient, and user-friendly applications in the Health-Tech sector.",
+                    "Beyond coding, I'm committed to breaking cycles and building a future where technology solves real-world problems. My goal is to work with international tech companies and contribute to innovative projects."
+                ]
+            },
+            stats: [
+                { number: "7", label: "Months Training" },
+                { number: "15+", label: "Projects Goal" },
+                { number: "100%", label: "Commitment" }
+            ],
+            skills: [
+                { name: "HTML & CSS", percent: 40 },
+                { name: "JavaScript", percent: 15 },
+                { name: "React", percent: 0 },
+                { name: "Node.js & Express", percent: 0 },
+                { name: "PostgreSQL", percent: 0 },
+                { name: "Git & GitHub", percent: 25 }
+            ],
+            timeline: [
+                { date: "May 2026", title: "Journey Begins", desc: "Started intensive web development training. Learning HTML, CSS, and JavaScript fundamentals. Building portfolio website." },
+                { date: "June-July 2026", title: "Frontend Mastery", desc: "Deep diving into React, state management, and modern frontend architecture. Building complex UI components." },
+                { date: "August-October 2026", title: "Backend Development", desc: "Learning Node.js, Express, and PostgreSQL. Building RESTful APIs and understanding server-side architecture." },
+                { date: "November-December 2026", title: "Full-Stack Projects", desc: "Building complete applications. Hero project: Doctor Appointment System. Starting freelance career targeting PKR 70k/month." },
+                { date: "2027-2029", title: "BS Computer Science", desc: "Pursuing formal CS degree while freelancing. Deepening understanding of algorithms, data structures, and system design." },
+                { date: "2029-2031", title: "MS from LUMS", desc: "Advanced studies and research. Preparing for international tech companies. Target: Google, Microsoft, or other FAANG." }
+            ],
+            projects: [
+                { icon: "🌐", title: "Professional Portfolio", desc: "Modern, responsive portfolio website with animations and interactive elements. Built to showcase skills and projects.", tags: ["HTML", "CSS", "JavaScript"] },
+                { icon: "⚕️", title: "Doctor Appointment System", desc: "Full-stack Health-Tech application for managing doctor appointments, patient records, and scheduling. (In Development)", tags: ["React", "Node.js", "PostgreSQL"] },
+                { icon: "📱", title: "Responsive Web Apps", desc: "Collection of mobile-first web applications with modern UI/UX and optimal performance across all devices.", tags: ["Responsive", "CSS Grid", "Flexbox"] }
+            ],
+            contact: [
+                { icon: "📧", label: "Email", value: "mateen.dev@example.com", link: "mailto:mateen.dev@example.com" },
+                { icon: "💻", label: "GitHub", value: "github.com/Abdulmateen1117", link: "https://github.com/Abdulmateen1117" },
+                { icon: "📱", label: "Phone", value: "+92 XXX XXXXXXX", link: "tel:+92XXXXXXXXXX" }
+            ],
+            footer: [
+                "© 2026 Mateen. All rights reserved.",
+                "🚀 Journey Started: May 20, 2026",
+                "🎯 Goal: Full-Stack Developer by December 2026",
+                '💪 Motto: "Break the cycle, build the future"'
+            ]
+        };
+
+        const DEFAULT_PASSWORD = "mateen2026";
+        const PASSWORD_KEY = "mateenPortfolioAdminPass";
+        let isAdminLoggedIn = false;
+
+        // ========== PASSWORD FUNCTIONS ==========
+        function getStoredPassword() {
+            return localStorage.getItem(PASSWORD_KEY) || DEFAULT_PASSWORD;
+        }
+
+        function setStoredPassword(newPass) {
+            localStorage.setItem(PASSWORD_KEY, newPass);
+        }
+
+        // ========== DATA MANAGEMENT ==========
+        let portfolioData = {};
+
+        function loadData() {
+            const saved = localStorage.getItem('mateenPortfolioData');
+            portfolioData = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(defaultData));
+            renderAll();
+        }
+
+        function saveData() {
+            localStorage.setItem('mateenPortfolioData', JSON.stringify(portfolioData));
+        }
+
+        function resetData() {
+            if (confirm("Reset all data to default? This cannot be undone.")) {
+                portfolioData = JSON.parse(JSON.stringify(defaultData));
+                saveData();
+                loadData();
+                populateAdmin();
+                alert("Reset complete!");
+            }
+        }
+
+        function exportData() {
+            const dataStr = JSON.stringify(portfolioData, null, 2);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = "mateen-portfolio-data.json"; a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importData() {
+            const area = document.getElementById('admin-import-area');
+            try {
+                portfolioData = JSON.parse(area.value);
+                saveData(); loadData(); populateAdmin();
+                alert("Data imported successfully!"); area.value = "";
+            } catch (e) { alert("Invalid JSON! Please paste valid exported data."); }
+        }
+
+        // ========== RENDER FUNCTIONS ==========
+        function renderAll() {
+            renderHero(); renderAbout(); renderStats(); renderSkills();
+            renderTimeline(); renderProjects(); renderContact(); renderFooter();
+        }
+
+        function renderHero() {
+            document.getElementById('hero-greeting').textContent = portfolioData.hero.greeting;
+            document.getElementById('hero-name').textContent = portfolioData.hero.name;
+            document.getElementById('hero-desc').textContent = portfolioData.hero.desc;
+        }
+
+        function renderAbout() {
+            document.getElementById('about-title').textContent = portfolioData.about.title;
+            document.getElementById('about-text-content').innerHTML = portfolioData.about.paragraphs.map(p => `<p>${p}</p>`).join('');
+        }
+
+        function renderStats() {
+            document.getElementById('about-stats').innerHTML = portfolioData.stats.map(s => `
+                <div class="stat-box"><div class="stat-number">${s.number}</div><div class="stat-label">${s.label}</div></div>
+            `).join('');
+        }
+
+        function renderSkills() {
+            document.getElementById('skills-grid').innerHTML = portfolioData.skills.map(s => `
+                <div class="skill-item">
+                    <div class="skill-header"><span class="skill-name">${s.name}</span><span class="skill-percentage">${s.percent}%</span></div>
+                    <div class="skill-bar"><div class="skill-progress" data-progress="${s.percent}"></div></div>
+                </div>
+            `).join('');
+            setTimeout(() => {
+                document.querySelectorAll('.skill-progress').forEach(bar => {
+                    const p = bar.getAttribute('data-progress');
+                    bar.style.width = (p === "0" ? "2" : p) + '%';
+                });
+            }, 100);
+        }
+
+        function renderTimeline() {
+            const items = portfolioData.timeline.map(t => `
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-date">${t.date}</div>
+                        <h3 class="timeline-title">${t.title}</h3>
+                        <p class="timeline-description">${t.desc}</p>
+                    </div>
+                    <div class="timeline-dot"></div>
+                </div>
+            `).join('');
+            document.getElementById('timeline-container').innerHTML = '<div class="timeline-line"></div>' + items;
+        }
+
+        function renderProjects() {
+            document.getElementById('projects-grid').innerHTML = portfolioData.projects.map(p => `
+                <div class="project-card">
+                    <div class="project-image">${p.icon}</div>
+                    <div class="project-info">
+                        <h3 class="project-title">${p.title}</h3>
+                        <p class="project-description">${p.desc}</p>
+                        <div class="project-tags">${p.tags.map(t => `<span class="project-tag">${t}</span>`).join('')}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderContact() {
+            document.getElementById('contact-info').innerHTML = portfolioData.contact.map(c => `
+                <a href="${c.link}" class="contact-box" target="${c.link.startsWith('http') ? '_blank' : '_self'}">
+                    <div class="contact-icon">${c.icon}</div>
+                    <div class="contact-label">${c.label}</div>
+                    <div class="contact-value">${c.value}</div>
+                </a>
+            `).join('');
+        }
+
+        function renderFooter() {
+            document.getElementById('footer-content').innerHTML = portfolioData.footer.map((f, i) => {
+                if (i === 0) return `<p>${f.replace('Mateen', '<span class="footer-highlight">Mateen</span>')}</p>`;
+                return `<p>${f.replace(/:\s*(.+)/, ': <span class="footer-highlight">$1</span>')}</p>`;
+            }).join('');
+        }
+
+        // ========== AUTH & ADMIN FUNCTIONS ==========
+        function openAdmin() {
+            if (isAdminLoggedIn) {
+                document.getElementById('admin-overlay').classList.add('active');
+                populateAdmin();
+            } else {
+                document.getElementById('auth-overlay').classList.add('active');
+                setTimeout(() => document.getElementById('auth-password').focus(), 100);
+            }
+        }
+
+        function loginAdmin() {
+            const input = document.getElementById('auth-password').value;
+            const error = document.getElementById('auth-error');
+            if (input === getStoredPassword()) {
+                isAdminLoggedIn = true;
+                document.getElementById('auth-overlay').classList.remove('active');
+                document.getElementById('auth-password').value = '';
+                error.classList.remove('show');
+                document.getElementById('admin-overlay').classList.add('active');
+                populateAdmin();
+            } else {
+                error.classList.add('show');
+                document.getElementById('auth-password').value = '';
+            }
+        }
+
+        function logoutAdmin() {
+            isAdminLoggedIn = false;
+            closeAdmin();
+            alert("Logged out successfully.");
+        }
+
+        function forgotPassword() {
+            if (confirm("Reset password to default (mateen2026)? You will lose your custom password.")) {
+                localStorage.removeItem(PASSWORD_KEY);
+                alert("Password reset to default: mateen2026");
+            }
+        }
+
+        function changePassword() {
+            const current = document.getElementById('admin-current-pass').value;
+            const newPass = document.getElementById('admin-new-pass').value;
+            const confirm = document.getElementById('admin-confirm-pass').value;
+
+            if (current !== getStoredPassword()) { alert("❌ Current password is wrong!"); return; }
+            if (!newPass || newPass.length < 4) { alert("❌ Password must be at least 4 characters!"); return; }
+            if (newPass !== confirm) { alert("❌ New passwords do not match!"); return; }
+
+            setStoredPassword(newPass);
+            document.getElementById('admin-current-pass').value = '';
+            document.getElementById('admin-new-pass').value = '';
+            document.getElementById('admin-confirm-pass').value = '';
+            alert("✅ Password changed successfully!");
+        }
+
+        function closeAdmin() {
+            document.getElementById('admin-overlay').classList.remove('active');
+        }
+
+        // ========== ADMIN POPULATE & EDIT FUNCTIONS ==========
+        function populateAdmin() {
+            document.getElementById('admin-hero-greeting').value = portfolioData.hero.greeting;
+            document.getElementById('admin-hero-name').value = portfolioData.hero.name;
+            document.getElementById('admin-hero-desc').value = portfolioData.hero.desc;
+            document.getElementById('admin-about-title').value = portfolioData.about.title;
+            document.getElementById('admin-about-p1').value = portfolioData.about.paragraphs[0] || '';
+            document.getElementById('admin-about-p2').value = portfolioData.about.paragraphs[1] || '';
+            document.getElementById('admin-about-p3').value = portfolioData.about.paragraphs[2] || '';
+            renderAdminStats(); renderAdminSkills(); renderAdminTimeline();
+            renderAdminProjects(); renderAdminContact();
+            document.getElementById('admin-footer-1').value = portfolioData.footer[0] || '';
+            document.getElementById('admin-footer-2').value = portfolioData.footer[1] || '';
+            document.getElementById('admin-footer-3').value = portfolioData.footer[2] || '';
+            document.getElementById('admin-footer-4').value = portfolioData.footer[3] || '';
+        }
+
+        function renderAdminStats() {
+            document.getElementById('admin-stats-container').innerHTML = portfolioData.stats.map((s, i) => `
+                <div class="admin-item">
+                    <div class="admin-item-header">
+                        <span class="admin-item-title">Stat #${i+1}</span>
+                        <button class="admin-item-delete" onclick="deleteStat(${i})">Delete</button>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 10px;">
+                        <input type="text" value="${s.number}" onchange="updateStat(${i}, 'number', this.value)">
+                        <input type="text" value="${s.label}" onchange="updateStat(${i}, 'label', this.value)">
+                    </div>
+                </div>
+            `).join('');
+        }
+        function addStat() { portfolioData.stats.push({ number: "0", label: "New Stat" }); renderAdminStats(); }
+        function updateStat(i, f, v) { portfolioData.stats[i][f] = v; }
+        function deleteStat(i) { portfolioData.stats.splice(i, 1); renderAdminStats(); }
+
+        function renderAdminSkills() {
+            document.getElementById('admin-skills-container').innerHTML = portfolioData.skills.map((s, i) => `
+                <div class="admin-item">
+                    <div class="admin-item-header">
+                        <span class="admin-item-title">${s.name}</span>
+                        <button class="admin-item-delete" onclick="deleteSkill(${i})">Delete</button>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 10px;">
+                        <input type="text" value="${s.name}" onchange="updateSkill(${i}, 'name', this.value)">
+                        <input type="number" min="0" max="100" value="${s.percent}" onchange="updateSkill(${i}, 'percent', parseInt(this.value)||0)">
+                    </div>
+                </div>
+            `).join('');
+        }
+        function addSkill() { portfolioData.skills.push({ name: "New Skill", percent: 0 }); renderAdminSkills(); }
+        function updateSkill(i, f, v) { portfolioData.skills[i][f] = v; }
+        function deleteSkill(i) { portfolioData.skills.splice(i, 1); renderAdminSkills(); }
+
+        function renderAdminTimeline() {
+            document.getElementById('admin-timeline-container').innerHTML = portfolioData.timeline.map((t, i) => `
+                <div class="admin-item">
+                    <div class="admin-item-header">
+                        <span class="admin-item-title">${t.title}</span>
+                        <button class="admin-item-delete" onclick="deleteTimeline(${i})">Delete</button>
+                    </div>
+                    <input type="text" value="${t.date}" onchange="updateTimeline(${i}, 'date', this.value)" style="margin-bottom:8px;">
+                    <input type="text" value="${t.title}" onchange="updateTimeline(${i}, 'title', this.value)" style="margin-bottom:8px;">
+                    <textarea onchange="updateTimeline(${i}, 'desc', this.value)">${t.desc}</textarea>
+                </div>
+            `).join('');
+        }
+        function addTimeline() { portfolioData.timeline.push({ date: "2026", title: "New Milestone", desc: "Description" }); renderAdminTimeline(); }
+        function updateTimeline(i, f, v) { portfolioData.timeline[i][f] = v; }
+        function deleteTimeline(i) { portfolioData.timeline.splice(i, 1); renderAdminTimeline(); }
+
+        function renderAdminProjects() {
+            document.getElementById('admin-projects-container').innerHTML = portfolioData.projects.map((p, i) => `
+                <div class="admin-item">
+                    <div class="admin-item-header">
+                        <span class="admin-item-title">${p.title}</span>
+                        <button class="admin-item-delete" onclick="deleteProject(${i})">Delete</button>
+                    </div>
+                    <input type="text" value="${p.icon}" onchange="updateProject(${i}, 'icon', this.value)" style="margin-bottom:8px;">
+                    <input type="text" value="${p.title}" onchange="updateProject(${i}, 'title', this.value)" style="margin-bottom:8px;">
+                    <textarea onchange="updateProject(${i}, 'desc', this.value)" style="margin-bottom:8px;">${p.desc}</textarea>
+                    <input type="text" value="${p.tags.join(', ')}" onchange="updateProjectTags(${i}, this.value)">
+                </div>
+            `).join('');
+        }
+        function addProject() { portfolioData.projects.push({ icon: "🚀", title: "New Project", desc: "Description", tags: ["HTML", "CSS"] }); renderAdminProjects(); }
+        function updateProject(i, f, v) { portfolioData.projects[i][f] = v; }
+        function updateProjectTags(i, v) { portfolioData.projects[i].tags = v.split(',').map(t => t.trim()).filter(t => t); }
+        function deleteProject(i) { portfolioData.projects.splice(i, 1); renderAdminProjects(); }
+
+        function renderAdminContact() {
+            document.getElementById('admin-contact-container').innerHTML = portfolioData.contact.map((c, i) => `
+                <div class="admin-item">
+                    <div class="admin-item-header">
+                        <span class="admin-item-title">${c.label}</span>
+                        <button class="admin-item-delete" onclick="deleteContact(${i})">Delete</button>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom:8px;">
+                        <input type="text" value="${c.icon}" onchange="updateContact(${i}, 'icon', this.value)">
+                        <input type="text" value="${c.label}" onchange="updateContact(${i}, 'label', this.value)">
+                    </div>
+                    <input type="text" value="${c.value}" onchange="updateContact(${i}, 'value', this.value)" style="margin-bottom:8px;">
+                    <input type="text" value="${c.link}" onchange="updateContact(${i}, 'link', this.value)">
+                </div>
+            `).join('');
+        }
+        function addContact() { portfolioData.contact.push({ icon: "📧", label: "Email", value: "email@example.com", link: "mailto:email@example.com" }); renderAdminContact(); }
+        function updateContact(i, f, v) { portfolioData.contact[i][f] = v; }
+        function deleteContact(i) { portfolioData.contact.splice(i, 1); renderAdminContact(); }
+
+        function saveAll() {
+            portfolioData.hero.greeting = document.getElementById('admin-hero-greeting').value;
+            portfolioData.hero.name = document.getElementById('admin-hero-name').value;
+            portfolioData.hero.desc = document.getElementById('admin-hero-desc').value;
+            portfolioData.about.title = document.getElementById('admin-about-title').value;
+            portfolioData.about.paragraphs = [
+                document.getElementById('admin-about-p1').value,
+                document.getElementById('admin-about-p2').value,
+                document.getElementById('admin-about-p3').value
+            ].filter(p => p.trim());
+            portfolioData.footer = [
+                document.getElementById('admin-footer-1').value,
+                document.getElementById('admin-footer-2').value,
+                document.getElementById('admin-footer-3').value,
+                document.getElementById('admin-footer-4').value
+            ];
+            saveData(); renderAll();
+            alert("✅ All changes saved!"); closeAdmin();
+        }
+
+        // ========== EVENT LISTENERS ==========
+        window.addEventListener('load', () => {
+            setTimeout(() => document.getElementById('preloader').classList.add('hidden'), 1500);
+            loadData();
+        });
+
+        // Admin access: Ctrl+Shift+A
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.shiftKey && e.key === 'A') {
+                e.preventDefault(); openAdmin();
+            }
+            if (e.key === 'Escape') {
+                document.getElementById('auth-overlay').classList.remove('active');
+                closeAdmin();
+            }
+        });
+
+        // Hide admin hint
+        setTimeout(() => { const h = document.getElementById('admin-hint'); if(h) h.style.opacity='0'; }, 5000);
+
+        // Navbar scroll
+        window.addEventListener('scroll', () => {
+            const n = document.getElementById('navbar');
+            if (window.scrollY > 100) n.classList.add('scrolled'); else n.classList.remove('scrolled');
+        });
+
+        // Mobile menu
+        document.getElementById('mobile-menu-btn').addEventListener('click', function() {
+            this.classList.toggle('active');
+            document.querySelector('.nav-links').classList.toggle('mobile-open');
+        });
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                document.getElementById('mobile-menu-btn').classList.remove('active');
+                document.querySelector('.nav-links').classList.remove('mobile-open');
+            });
+        });
+
+        // Typing animation
+        const texts = ["Full-Stack Web Developer", "React Enthusiast", "Problem Solver", "Health-Tech Specialist"];
+        let textIndex = 0, charIndex = 0, isDeleting = false;
+        const typingElement = document.getElementById('typing-text');
+        function type() {
+            const currentText = texts[textIndex];
+            if (isDeleting) {
+                typingElement.innerHTML = currentText.substring(0, charIndex - 1) + '<span class="typing-cursor"></span>';
+                charIndex--;
+            } else {
+                typingElement.innerHTML = currentText.substring(0, charIndex + 1) + '<span class="typing-cursor"></span>';
+                charIndex++;
+            }
+            let typeSpeed = isDeleting ? 50 : 100;
+            if (!isDeleting && charIndex === currentText.length) { typeSpeed = 2000; isDeleting = true; }
+            else if (isDeleting && charIndex === 0) { isDeleting = false; textIndex = (textIndex + 1) % texts.length; typeSpeed = 500; }
+            setTimeout(type, typeSpeed);
+        }
+        setTimeout(type, 2500);
+
+        // Fade in on scroll
+        const fadeObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.fade-in').forEach(el => fadeObserver.observe(el));
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+    </script>
+    
+</body>
+</html>
